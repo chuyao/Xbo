@@ -13,7 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends WeiboAuthActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     @Override
@@ -40,6 +40,11 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    @Override
+    public void onComplete(Bundle bundle) {
+        super.onComplete(bundle);
     }
 
     @Override
