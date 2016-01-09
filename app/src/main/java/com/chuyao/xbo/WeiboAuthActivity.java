@@ -2,7 +2,6 @@ package com.chuyao.xbo;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.sina.weibo.sdk.auth.AuthInfo;
@@ -12,7 +11,6 @@ import com.sina.weibo.sdk.auth.sso.SsoHandler;
 import com.sina.weibo.sdk.exception.WeiboException;
 import com.sina.weibo.sdk.net.RequestListener;
 import com.sina.weibo.sdk.openapi.UsersAPI;
-import com.sina.weibo.sdk.openapi.models.User;
 
 public class WeiboAuthActivity extends AppCompatActivity implements WeiboAuthListener, RequestListener{
 
@@ -68,10 +66,6 @@ public class WeiboAuthActivity extends AppCompatActivity implements WeiboAuthLis
      */
     @Override
     public void onComplete(String s) {
-        Log.d(TAG, "onComplete: " + s);
-//        if(!TextUtils.isEmpty(s)) {
-//            User user = User.parse(s);
-//        }
     }
 
     @Override
