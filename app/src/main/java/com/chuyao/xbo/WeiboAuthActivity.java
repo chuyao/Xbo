@@ -69,9 +69,9 @@ public class WeiboAuthActivity extends AppCompatActivity implements WeiboAuthLis
     @Override
     public void onComplete(String s) {
         Log.d(TAG, "onComplete: " + s);
-        if(!TextUtils.isEmpty(s)) {
-            User user = User.parse(s);
-        }
+//        if(!TextUtils.isEmpty(s)) {
+//            User user = User.parse(s);
+//        }
     }
 
     @Override
