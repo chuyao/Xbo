@@ -1,4 +1,4 @@
-package com.chuyao.xbo;
+package com.chuyao.xbo.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
