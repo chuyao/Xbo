@@ -2,7 +2,6 @@ package com.chuyao.xbo;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -11,12 +10,11 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
-import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.sina.weibo.sdk.openapi.models.User;
 
@@ -25,10 +23,14 @@ public class MainActivity extends WeiboAuthActivity
 
     private static final String TAG = "MainActivity";
 
+    private SimpleDraweeView ivHeader;
+    private TextView tvName;
+    private TextView tvMain;
+    private String timeline;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fresco.initialize(this);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -47,20 +49,36 @@ public class MainActivity extends WeiboAuthActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(timeline == null){
+            getTimeline(0, 0, 50, 1, false, 0, false);
+        }
     }
 
     private void updateUserInfo(User user){
-        SimpleDraweeView headerImageView = (SimpleDraweeView) findViewById(R.id.imageView);
-        headerImageView.setImageURI(Uri.parse(user.profile_image_url));
+        ((SimpleDraweeView) findViewById(R.id.ivHeader)).setImageURI(Uri.parse(user.profile_image_url));
+        ((TextView) findViewById(R.id.tvName)).setText(user.name);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+//        navigationView.getMenu().findItem()
     }
 
     @Override
     public void onComplete(String s) {
         super.onComplete(s);
         updateUserInfo(User.parse(s));
+    }
+
+    @Override
+    protected void onTimeLineComplete(String s) {
+        super.onTimeLineComplete(s);
+        Log.e(TAG, "onTimeLineComplete\n" + s);
     }
 
     @Override

@@ -11,6 +11,7 @@ import com.sina.weibo.sdk.auth.WeiboAuthListener;
 import com.sina.weibo.sdk.auth.sso.SsoHandler;
 import com.sina.weibo.sdk.exception.WeiboException;
 import com.sina.weibo.sdk.net.RequestListener;
+import com.sina.weibo.sdk.openapi.StatusesAPI;
 import com.sina.weibo.sdk.openapi.UsersAPI;
 
 public class WeiboAuthActivity extends AppCompatActivity implements WeiboAuthListener, RequestListener{
@@ -20,6 +21,7 @@ public class WeiboAuthActivity extends AppCompatActivity implements WeiboAuthLis
     private SsoHandler mSsoHandler;
     private AuthInfo mAuthInfo;
     protected Oauth2AccessToken mAccessToken;
+    private StatusesAPI statusAPI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,16 +32,26 @@ public class WeiboAuthActivity extends AppCompatActivity implements WeiboAuthLis
 
     @Override
     protected void onResume() {
+        checkWeiboBaseStatus();
+        super.onResume();
+    }
+
+    private void checkWeiboBaseStatus(){
+        if(!isTokenValid()){
+            mSsoHandler.authorizeWeb(this);
+        }else{
+            getUserInfo();
+        }
+    }
+
+    private boolean isTokenValid(){
         mAccessToken = AccessTokenKeeper.readAccessToken(this);
         if(mAccessToken.isSessionValid()){
             long expired_in = mAccessToken.getExpiresTime();
             long now_time = System.currentTimeMillis();
-            if(now_time > expired_in)
-                mSsoHandler.authorizeWeb(this);
-        }else{
-            mSsoHandler.authorizeWeb(this);
+            return expired_in > now_time;
         }
-        super.onResume();
+        return false;
     }
 
     /**
@@ -52,13 +64,36 @@ public class WeiboAuthActivity extends AppCompatActivity implements WeiboAuthLis
         if(mAccessToken.isSessionValid()) {
             AccessTokenKeeper.writeAccessToken(this, mAccessToken);
             Log.v(TAG, mAccessToken.toString());
-            getUserInfo(mAccessToken);
+            getUserInfo();
         }
     }
 
-    protected void getUserInfo(Oauth2AccessToken token){
-        UsersAPI usersAPI = new UsersAPI(this, Constants.APP_KEY, token);
-        usersAPI.show(Long.parseLong(token.getUid()), this);
+    private void getUserInfo(){
+        UsersAPI usersAPI = new UsersAPI(this, Constants.APP_KEY, mAccessToken);
+        usersAPI.show(Long.parseLong(mAccessToken.getUid()), this);
+    }
+
+    protected void getTimeline(long since_id, long max_id, int count, int page, boolean base_app,
+                             int featureType, boolean trim_user){
+        if(!mAccessToken.isSessionValid())
+            return;
+        statusAPI = new StatusesAPI(this, Constants.APP_KEY, mAccessToken);
+        RequestListener listener = new RequestListener() {
+            @Override
+            public void onComplete(String s) {
+                onTimeLineComplete(s);
+            }
+
+            @Override
+            public void onWeiboException(WeiboException e) {
+
+            }
+        };
+        statusAPI.friendsTimeline(since_id, max_id, count, page, base_app, featureType, trim_user, listener);
+    }
+
+    protected void onTimeLineComplete(String s){
+
     }
 
     /**
