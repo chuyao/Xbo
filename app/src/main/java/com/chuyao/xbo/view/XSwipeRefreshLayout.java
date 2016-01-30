@@ -15,7 +15,7 @@ import com.chuyao.xbo.R;
 /**
  * Created by chuyao on 16-1-18.
  */
-public class XSwipeRefreshLayout extends SwipeRefreshLayout implements AbsListView.OnScrollListener {
+public class XSwipeRefreshLayout extends SwipeRefreshLayout implements AbsListView.OnScrollListener, SwipeRefreshLayout.OnRefreshListener {
 
     private boolean isLoading;
     private int mTouchSlop;
@@ -24,9 +24,16 @@ public class XSwipeRefreshLayout extends SwipeRefreshLayout implements AbsListVi
     private ListView mListView;
     private View mFooterView;
     private OnLoadListener mOnLoadListener;
+    public Status status;
+
+    public enum Status {
+        REFRESH, LOAD
+    }
 
     public interface OnLoadListener {
         void onLoad();
+
+        void onRefresh();
     }
 
     public XSwipeRefreshLayout(Context context) {
@@ -37,6 +44,14 @@ public class XSwipeRefreshLayout extends SwipeRefreshLayout implements AbsListVi
         super(context, attrs);
         mFooterView = LayoutInflater.from(context).inflate(R.layout.layout_refresh_footer, null, false);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        setOnRefreshListener(this);
+    }
+
+    @Override
+    public void onRefresh() {
+        status = Status.REFRESH;
+        if (mOnLoadListener != null)
+            mOnLoadListener.onRefresh();
     }
 
     @Override
@@ -67,18 +82,19 @@ public class XSwipeRefreshLayout extends SwipeRefreshLayout implements AbsListVi
         return super.dispatchTouchEvent(ev);
     }
 
-    public void setOnLoadListener(OnLoadListener listener){
+    public void setOnLoadListener(OnLoadListener listener) {
         this.mOnLoadListener = listener;
     }
 
     private void loadData() {
+        status = Status.LOAD;
         if (mOnLoadListener != null) {
             mOnLoadListener.onLoad();
             setLoading(true);
         }
     }
 
-    private void setLoading(boolean loading) {
+    public void setLoading(boolean loading) {
         isLoading = loading;
         if (isLoading) {
             mListView.addFooterView(mFooterView);
@@ -121,7 +137,7 @@ public class XSwipeRefreshLayout extends SwipeRefreshLayout implements AbsListVi
 
     @Override
     public void onScroll(AbsListView absListView, int i, int i1, int i2) {
-        if(canLoad())
+        if (canLoad())
             loadData();
     }
 }
