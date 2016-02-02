@@ -13,20 +13,32 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import com.chuyao.xbo.adapter.TimeLineLIstAdapter;
+import com.chuyao.xbo.model.Status;
+import com.chuyao.xbo.model.TimelineData;
+import com.chuyao.xbo.view.XSwipeRefreshLayout;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.sina.weibo.sdk.openapi.models.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends WeiboAuthActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MainActivity";
+    private XSwipeRefreshLayout mSwipeRefreshLayout;
+    private ListView mListView;
+    private TimeLineLIstAdapter mAdapter;
+    private long since_id;
+    private long max_id;
+    private int page;
 
-    private SimpleDraweeView ivHeader;
-    private TextView tvName;
-    private TextView tvMain;
-    private String timeline;
+    private List<Status> mData = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,21 +64,41 @@ public class MainActivity extends WeiboAuthActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        initViews();
     }
+
+    private void initViews(){
+        mSwipeRefreshLayout = (XSwipeRefreshLayout) findViewById(R.id.swipeLayout);
+        mSwipeRefreshLayout.setOnLoadListener(loadListener);
+        mListView = (ListView) findViewById(R.id.listView);
+        mAdapter = new TimeLineLIstAdapter(this, mData);
+        mListView.setAdapter(mAdapter);
+    }
+
+    final XSwipeRefreshLayout.OnLoadListener loadListener = new XSwipeRefreshLayout.OnLoadListener() {
+        @Override
+        public void onLoad() {
+            getTimeline(0, max_id, 50, page, false, 0, false);
+        }
+
+        @Override
+        public void onRefresh() {
+            page = 0;
+            getTimeline(0, 0, 50, 1, false, 0, false);
+        }
+    };
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(timeline == null){
-            getTimeline(0, 0, 50, 1, false, 0, false);
+        if(mAdapter.isEmpty()){
+            mSwipeRefreshLayout.onRefresh();
         }
     }
 
     private void updateUserInfo(User user){
         ((SimpleDraweeView) findViewById(R.id.ivHeader)).setImageURI(Uri.parse(user.profile_image_url));
         ((TextView) findViewById(R.id.tvName)).setText(user.name);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-//        navigationView.getMenu().findItem()
     }
 
     @Override
@@ -78,7 +110,25 @@ public class MainActivity extends WeiboAuthActivity
     @Override
     protected void onTimeLineComplete(String s) {
         super.onTimeLineComplete(s);
-        Log.e(TAG, "onTimeLineComplete\n" + s);
+    }
+
+    @Override
+    protected void onTimeLineComplete(TimelineData timelineData) {
+        super.onTimeLineComplete(timelineData);
+        if(timelineData.statuses != null) {
+            if (mSwipeRefreshLayout.status == XSwipeRefreshLayout.Status.REFRESH) {
+                mData.clear();
+                mData.addAll(timelineData.statuses);
+            } else if(mSwipeRefreshLayout.status == XSwipeRefreshLayout.Status.LOAD){
+                mData.addAll(timelineData.statuses);
+                mSwipeRefreshLayout.setLoading(false);
+            }
+            page++;
+        }
+        mSwipeRefreshLayout.setRefreshing(false);
+        mAdapter.notifyDataSetChanged();
+        since_id = timelineData.since_id;
+        max_id = timelineData.max_id;
     }
 
     @Override
