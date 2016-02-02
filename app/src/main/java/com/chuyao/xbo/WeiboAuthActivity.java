@@ -4,6 +4,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.alibaba.fastjson.JSON;
+import com.chuyao.xbo.model.TimelineData;
 import com.chuyao.xbo.util.AccessTokenKeeper;
 import com.sina.weibo.sdk.auth.AuthInfo;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
@@ -81,7 +83,11 @@ public class WeiboAuthActivity extends AppCompatActivity implements WeiboAuthLis
         RequestListener listener = new RequestListener() {
             @Override
             public void onComplete(String s) {
-                onTimeLineComplete(s);
+                try{
+                    TimelineData timelineData = JSON.parseObject(s, TimelineData.class);
+                    onTimeLineComplete(timelineData);
+                }catch (Exception e){}
+
             }
 
             @Override
@@ -93,6 +99,10 @@ public class WeiboAuthActivity extends AppCompatActivity implements WeiboAuthLis
     }
 
     protected void onTimeLineComplete(String s){
+
+    }
+
+    protected void onTimeLineComplete(TimelineData timelineData){
 
     }
 

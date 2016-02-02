@@ -4,7 +4,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -17,7 +16,6 @@ import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.alibaba.fastjson.JSON;
 import com.chuyao.xbo.adapter.TimeLineLIstAdapter;
 import com.chuyao.xbo.model.Status;
 import com.chuyao.xbo.model.TimelineData;
@@ -32,11 +30,6 @@ public class MainActivity extends WeiboAuthActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MainActivity";
-
-    private SimpleDraweeView ivHeader;
-    private TextView tvName;
-    private TextView tvMain;
-    private String timeline;
     private XSwipeRefreshLayout mSwipeRefreshLayout;
     private ListView mListView;
     private TimeLineLIstAdapter mAdapter;
@@ -106,8 +99,6 @@ public class MainActivity extends WeiboAuthActivity
     private void updateUserInfo(User user){
         ((SimpleDraweeView) findViewById(R.id.ivHeader)).setImageURI(Uri.parse(user.profile_image_url));
         ((TextView) findViewById(R.id.tvName)).setText(user.name);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-//        navigationView.getMenu().findItem()
     }
 
     @Override
@@ -119,22 +110,25 @@ public class MainActivity extends WeiboAuthActivity
     @Override
     protected void onTimeLineComplete(String s) {
         super.onTimeLineComplete(s);
-        Log.e(TAG, "onTimeLineComplete\n" + s);
-        TimelineData data = JSON.parseObject(s, TimelineData.class);
-        if(data.statuses != null) {
+    }
+
+    @Override
+    protected void onTimeLineComplete(TimelineData timelineData) {
+        super.onTimeLineComplete(timelineData);
+        if(timelineData.statuses != null) {
             if (mSwipeRefreshLayout.status == XSwipeRefreshLayout.Status.REFRESH) {
                 mData.clear();
-                mData.addAll(data.statuses);
+                mData.addAll(timelineData.statuses);
             } else if(mSwipeRefreshLayout.status == XSwipeRefreshLayout.Status.LOAD){
-                mData.addAll(data.statuses);
+                mData.addAll(timelineData.statuses);
                 mSwipeRefreshLayout.setLoading(false);
             }
             page++;
         }
         mSwipeRefreshLayout.setRefreshing(false);
         mAdapter.notifyDataSetChanged();
-        since_id = data.since_id;
-        max_id = data.max_id;
+        since_id = timelineData.since_id;
+        max_id = timelineData.max_id;
     }
 
     @Override
