@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 import com.chuyao.xbo.R;
 import com.chuyao.xbo.model.Status;
+import com.chuyao.xbo.util.DateUtil;
+import com.chuyao.xbo.util.HtmlUtil;
 
 import java.util.List;
 
@@ -54,9 +56,9 @@ public class TimeLineLIstAdapter extends BaseAdapter{
             viewHolder = (ViewHolder) view.getTag();
         }
         final Status itemData = data.get(i);
-        viewHolder.tvTitle.setText(itemData.text);
+        viewHolder.tvTitle.setText(HtmlUtil.convertWeiboText(itemData.text));
         viewHolder.tvUserName.setText(itemData.user.name);
-        viewHolder.tvTime.setText(itemData.created_at);
+        viewHolder.tvTime.setText(DateUtil.formatCommonDate(itemData.created_at));
         return view;
     }
 
