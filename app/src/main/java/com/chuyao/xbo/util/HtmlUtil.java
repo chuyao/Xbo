@@ -1,7 +1,5 @@
 package com.chuyao.xbo.util;
 
-import android.text.Html;
-import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 
 import java.util.regex.Pattern;
