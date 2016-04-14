@@ -4,7 +4,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -37,7 +36,7 @@ public class MainActivity extends WeiboAuthActivity
     private long max_id;
     private int page;
 
-    private List<Status> mData = new ArrayList<>();
+    private List<Status> mData = new ArrayList<Status>();
 
 
     @Override
@@ -67,7 +66,7 @@ public class MainActivity extends WeiboAuthActivity
         initViews();
     }
 
-    private void initViews(){
+    private void initViews() {
         mSwipeRefreshLayout = (XSwipeRefreshLayout) findViewById(R.id.swipeLayout);
         mSwipeRefreshLayout.setOnLoadListener(loadListener);
         mListView = (ListView) findViewById(R.id.listView);
@@ -91,12 +90,12 @@ public class MainActivity extends WeiboAuthActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if(mAdapter.isEmpty()){
+        if (mAdapter.isEmpty()) {
             mSwipeRefreshLayout.onRefresh();
         }
     }
 
-    private void updateUserInfo(User user){
+    private void updateUserInfo(User user) {
         ((SimpleDraweeView) findViewById(R.id.ivHeader)).setImageURI(Uri.parse(user.profile_image_url));
         ((TextView) findViewById(R.id.tvName)).setText(user.name);
     }
@@ -115,11 +114,11 @@ public class MainActivity extends WeiboAuthActivity
     @Override
     protected void onTimeLineComplete(TimelineData timelineData) {
         super.onTimeLineComplete(timelineData);
-        if(timelineData.statuses != null) {
+        if (timelineData.statuses != null) {
             if (mSwipeRefreshLayout.status == XSwipeRefreshLayout.Status.REFRESH) {
                 mData.clear();
                 mData.addAll(timelineData.statuses);
-            } else if(mSwipeRefreshLayout.status == XSwipeRefreshLayout.Status.LOAD){
+            } else if (mSwipeRefreshLayout.status == XSwipeRefreshLayout.Status.LOAD) {
                 mData.addAll(timelineData.statuses);
                 mSwipeRefreshLayout.setLoading(false);
             }
